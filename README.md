@@ -1,2 +1,4 @@
 # R-for-genomics-Carpentries
-This foolows the carpentries curriculum for introducing R for genomics
+This follows the carpentries curriculum for introducing R for genomics
+
+I addedthis line in R studio
