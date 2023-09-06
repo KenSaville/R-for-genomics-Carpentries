@@ -1,0 +1,19 @@
+---
+title: "R-for-genomics-Carpentries version"
+author: "Saville"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### This document follows the instructions from the Carpentries Curriculum example.
+
+The info is from this [site](https://datacarpentry.org/genomics-r-intro/)
+
+According to that site we need to use a carpentries AWS instance.  Although it does say it is using R
+
+So it looks like we can't do this here.
+
