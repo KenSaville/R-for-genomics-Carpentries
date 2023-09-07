@@ -159,5 +159,49 @@ We can also check how many levels there are by using the levels function.  This 
 #check how many levels in the feature column that we just extracted.
 levels(feature)
 ```
-Next
+
+And let's check the stucture of feature
+
+```{r}
+str(feature)
+
+```
+To get an idea of how factor data can be useful, let's make a basic plot of the feature data.  In base R there is a function called plot().  It is a quick way to generate a plot (or graph) of some data.  The function generally figures out the best type of plot based on the data.  While this is helpful for quick looks at the data, more advanced plotting techniques are available.  We'll cover those later.
+
+Here let's just plot the feature data
+
+```{r}
+#generate a simple plot of feature data
+
+plot(feature)
+
+```
+
+Simple enough.  The plot function counted up the number of genes in each of of the factor "levels" and made a bar graph.  If the data wasn't in factor form, plot would not generate this plot.  Let's demonstrate
+
+```{r}
+#convert feature data back to character.  Save it as feature_chr
+
+feature_chr <- as.character(feature)
+
+```
+
+Let' see if that worked
+
+```{r}
+#check structure of feature chr vector
+str(feature_chr)
+
+#now try to plot it
+plot(feature_chr)
+
+```
+
+Note that the plot didn't know what to do with this data.  We could certainly write some ode to count up the number of each type of gene, but the factor aspect of the data makes it much easier.
+
+Now let's remove the factor_chr data to avoid confusion
+
+```{r}
+rm(feature_chr)
+```
 
