@@ -23,7 +23,7 @@ annotatedDEgenes <- read.csv("https://zenodo.org/record/3477564/files/annotatedD
 ```
 
 
-View the file witht the View command.  FTaer Viewing this, comment out the View command
+View the file with the View command.  After Viewing this, comment out the View command
 
 ```{r}
 #View(annotatedDEgenes)
@@ -34,12 +34,12 @@ List the names of the columns
 ```{r}
 colnames(annotatedDEgenes)
 ```
-This data is RNA seq data from a previous Galaxy tutorial.
+This data is RNA seq data from a previous Galaxy tutorial.  The essential data consists of "counts" of sequencing reads that map to specific genes in the Drosophila genome.
 
-Below is a brief description of each coljmn from that tutorial
+Below is a brief description of each column from that tutorial
 
 GeneID:  Gene identifiers
-Base.mean:   Mean normalized counts over all samples
+Base.mean:   Mean normalized seq read counts over all samples
 log2.FC:  Log2 fold change
 StdErr:   Standard error estimate for the log2 fold change estimate
 Wald.Stats:   Wald statistic
@@ -100,8 +100,33 @@ A factor let's you organize data by categories.  For example, if you had data on
 
 Since some of the data in our data frame are factors, lets see how factors work.
 
+When we import the data using the command above, the character data did not come in as factor data as it is supposed to according to the galaxy walkthrough.
+
+Here, we can convert the chr data to factor data, so that our data frame is consistent with the tutorial.  There are various ways to do this.  Here we will try a function from the dplyr package called mutateif.  This will change (mutate) data in a dataframe based on some condition.  We will cover some other basic functions of dplyr a bit later.
+
+first we need to install and load the dplyr pakcge.  dplyr is part of what is called the tidyverse, so we'll install the tiduverse which has lots of other useful packages.
+
 ```{r}
-annotatedDEgenes <- as.data.frame(annotatedDEgenes, stringsAsFactors=TRUE)
+install.packages("tidyverse")
+library(tidyverse)
+
+```
+now wecan run mutate_if, because it is part of the now loaded dplyr package
+
+```{r}
+#we will store the modified data frame with the same name 
+
+annotatedDEgenes <- annotatedDEgenes %>% mutate_if(is.character, as.factor)
+
+#the above code can be read as follows:  
+#The expression on the right says: input the annotatedDEgenes datframe into the mutateif function.  Within this functio look for everything that is a character (is.character) and change it to factor (as.factor).  the annotatedDEgenes on the left is saying to take the results of the function on the right and store it back in the annotatedDEgenes variable.  Let's see if it works.  Run this code block.
+```
+
+Now let's look at the data frame and see if we have factor data
+
+```{r}
+#check structure of modified dataframe.
+str(annotatedDEgenes)
 ```
 
 
@@ -125,13 +150,14 @@ head(annotatedDEgenes$Feature)
 
 head(feature)
 
-# both give the same thing.
+# both give the same thing.  The fact that it list levels tells us that the data is being treated as a factor.
 
 ```
+We can also check how many levels there are by using the levels function.  This function works on 
 
-According to the Galaxy tutorial, the feature column and other columns should be a type of data called a factor  When we imported the data, these columns came in as simple character data.  We want to explore this idea of 
 ```{r}
-feature <- as.factor(feature)
-head(feature)
+#check how many levels in the feature column that we just extracted.
+levels(feature)
 ```
+
 
