@@ -1,0 +1,137 @@
+---
+title: "R for genomics_Galaxy_version"
+output: html_document
+date: "2023-09-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document follows the Advanced R in Galaxy tutorial from usegalaxy.org, with a few additions / modifications added by me.
+
+First - read in the file of annotated genes
+
+```{r}
+## read in a CSV file and save it as 'annotatedDEgenes'
+annotatedDEgenes <- read.csv("https://zenodo.org/record/3477564/files/annotatedDEgenes.tabular", sep = "\t")
+
+## note that because this is a tab delimted file, sep = \t needs to be included in the read.csv command.
+
+## reading it in with the default csv parameter results in a file with only one variable.  Reading it in with sep = /t creates 13 variables (columns)
+
+```
+
+
+View the file witht the View command.  FTaer Viewing this, comment out the View command
+
+```{r}
+#View(annotatedDEgenes)
+```
+
+List the names of the columns
+
+```{r}
+colnames(annotatedDEgenes)
+```
+This data is RNA seq data from a previous Galaxy tutorial.
+
+Below is a brief description of each coljmn from that tutorial
+
+GeneID:  Gene identifiers
+Base.mean:   Mean normalized counts over all samples
+log2.FC:  Log2 fold change
+StdErr:   Standard error estimate for the log2 fold change estimate
+Wald.Stats:   Wald statistic
+P.value:   p-value for the Wald statistic
+P.adj:   p-value adjusted for multiple testing with the Benjamini-Hochberg              procedure for the Wald statistic
+Chromosome:  Which chromosome the gene is on
+Start:   Starting DNA coordinate of the gene
+End:  Ending DNA coordinate of the gene
+Strand:  strand (+ or -) the gene is on in the reference genome.
+Feature:  What type of gene it is (protein coding, non-coding, etc)
+Gene name:  kinda self explanatory, the name of the gene.
+
+For this tutorial, the details of the various statistical measures aren't important, as we are simply using this data as an example data table for performing some R manipulations.  For more details on the RNA sequence analysis, see the [Reference-based RNA-Seq data analysis](https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html#annotation-of-the-deseq2-results)
+
+### Now let's play around with this dataframe
+
+Tabular data are stored in R using data frame. A data frame could also be thought of as a collection of vectors, all of which have the same length.
+
+```{r}
+
+## get summary statistics on a data frame.  The summary function calculates and dispays basic descriptive statistics for each column of data (if the data is numerical and amenable to these calculations)
+
+summary(annotatedDEgenes)
+```
+
+Another way to inspect the datframe is to use the structure function:  str().  This tells us the name of each column, the type of data in each column and the first few cvlaues in each column.  To learn more about the structure column type ?str
+
+```{r}
+#learn more about the str function
+
+?str
+# Use the str() function on our dataframe.  Type str() and start typing the name of the data frame ann then hit the tab key to complete the name.  Using the tab key helps avoid spelling mistakes and ensures that the dataframe is available in the place we are looking for it.
+
+str(annotatedDEgenes)
+
+#It may help to widen this window so the info for each column is displayed on one line.
+```
+Ok, thats a lot to unpack! Some things to notice:
+
+The object type data.frame is displayed in the first row along with its dimensions, in this case 130 observations (rows) and 13 variables (columns)
+
+Each variable (column) has a name (e.g. GeneID). This is followed by the object mode (e.g. factor, int, num, etc.). Notice that before each variable name there is a $ - this will be important later.
+So from both summary and str, we know that our data frame had 13 variables that summarize the data.
+
+Base.mean, log2.FC. and P.value variables (and several others) are numerical data
+
+From the summary function, we get summary statistics on the min and max values for these columns, as well as mean, median, and interquartile ranges
+
+Many of the other variables (e.g. Strand) are treated as categorical data
+
+This type has special treatment in R - more on this in a bit. The most frequent 6 different categories and the number of times they appear (e.g. the Strand called - appeared 58 times) are displayed. Another example is the protein_coding value for Feature which appeared in 126 observations.
+
+## Factors
+
+Factors, the final major data structure we will introduce, can be thought of as vectors which are specialized for categorical data. Given R’s specialization for statistics, this make sense since categorial and continuous variables usually have different treatments. Sometimes you may want to have data treated as a factor, but in other cases, this may be undesirable.
+
+A factor let's you organize data by categories.  For example, if you had data on organisms based on the old kingdom rules you might have plant, animal, fungi ... as factors.  Then you could act perform a function only on animals for example.
+
+Since some of the data in our data frame are factors, lets see how factors work.
+
+```{r}
+annotatedDEgenes <- as.data.frame(annotatedDEgenes, stringsAsFactors=TRUE)
+```
+
+
+```{r}
+## extract the "feature" column to a new object
+feature <- annotatedDEgenes$Feature
+
+# here's where that dollar sign symbol comes in.  Using the $ symbol we can designate specific columns.  annotatedDEgene$Feature refers to the Feature column of the annotatedDEgenes dataframe.
+
+
+```
+
+Let's look at the first few entries n the Feature column using the head() function.
+
+```{r}
+#we could use the head function directly on the features column within the dta frame like this:
+
+head(annotatedDEgenes$Feature)
+
+#But because we already extracted that column into a new object called feature, we can do this
+
+head(feature)
+
+# both give the same thing.
+
+```
+
+According to the Galaxy tutorial, the feature column and other columns should be a type of data called a factor  When we imported the data, these columns came in as simple character data.  We want to explore this idea of 
+```{r}
+feature <- as.factor(feature)
+head(feature)
+```
+
