@@ -205,3 +205,88 @@ Now let's remove the factor_chr data to avoid confusion
 rm(feature_chr)
 ```
 
+###Subset a data frame
+
+Now we would like to know how to get specific values from data frames, and where necessary, change the mode of a column of values.
+
+A data frame is two-dimensional (rows and columns). Therefore, to select a specific value we will use [] (bracket) notation.  The basic way to subset the data frame is to indicate the row as the first number and the column as the second number.  It looks like this, where df stands for the name of the data frame.
+
+Here are some ways to write the subsetting notation.  In general,
+
+Use of 2 values, separated by commas: data.frame[row, column]
+Use of a colon between the numbers (start:stop, inclusive) for a continuous range of numbers (e.g. dataframe[1:4, 2])
+Passing a vector using c() for a non continuous set of numbers
+Index using the name of a column(s) by passing them as vectors using c()
+
+SOme more general examples:
+
+df[1,1]  selects the value in the first row, first column.
+
+df [2, 4] selects the value in the second row, fourth column.
+
+df[2, ] selects the second row, all columns (the commas is necessary.  df[2] would give an error)
+df[-1, ] all rows except the last.  all columns
+df[1:4, 1] rows 1 through 4, all columns
+
+** you can also select columns by name.  the c() notation allows you to combine more than one column name.  Also - quotes are necessary for column names. **
+
+df[1:10, c("Name of column 3", "Name of column 6")] rows 1 through 10, columns 3 and 6.
+
+df[, c("column")] all rows 
+head(df) the first 6 rows (6 is the default number of rows for the head function
+head(df, 10).  The first 10 rows
+tail(df) the last 6 rows (6 is the default number of rows for the tail function
+tail(df, 10).  The last 10 rows
+
+you can specify specific columns using dollar sign notation.  Generally this looks like 
+
+df$columnName
+
+A very useful feature is being to be able to select rows based on the value in that row for a specific column.
+
+A general example would look like this,
+
+```{r}
+#df[df$ColumnName == "someSpecificTerm"].  The first df indicates the data frame name, the df$ColumnName part says "look in this column".  the == means "if it matches" "someSPecificTerm" is the thing to be matched.  This notation takes some getting used to and will be clearer wth real examples.
+
+#I had to put this part in a code block because the $ symbol has a special interpretation in the R markdown part of the document.
+```
+
+Here are some examples uisng the annotatedDEgenes dataframe.  Run each line separately by placing your cursor at the end of the line and typing the ctrl-enter key combination
+
+First I'll recall the column names so we know what to expect.  Also the rows are just specific geneIDs
+
+```{r}
+colnames(annotatedDEgenes)
+```
+
+
+```{r}
+annotatedDEgenes[1, 1] #first row first column (the 1st geneID)
+annotatedDEgenes[2, 4] #second row fourth column (a StdErr value for gene 2)
+annotatedDEgenes[130, 13] #The last gene name
+annotatedDEgenes[2, ] #all columns for row 2
+annotatedDEgenes[-1, ] #All rows except the last all columns
+annotatedDEgenes[1:4, 1] #genes 1-4, geneID
+annotatedDEgenes[1:10, c("Feature", "Gene.name")] # rows 1-10, the Feature and Gene.name column*
+annotatedDEgenes[, "Gene.name"] #the Gene name for all rows.
+head(annotatedDEgenes)# first 6 rows
+head(annotatedDEgenes, 10)# first 10 rows
+tail(annotatedDEgenes) #last 6
+tail(annotatedDEgenes, 10) #last 10
+annotatedDEgenes$GeneID #the gene ID colun
+annotatedDEgenes[annotatedDEgenes$Feature == "pseudogene", ] #all rows (genes) in the Feature column that match the term "pseudogene" (apparently there is only one)
+
+#note"  the following doesn't work.  You need to designate the column as annotatedDEgenes$Feature
+
+annotatedDEgenes["Feature" == "pseudogene", ]
+
+#This does work
+annotatedDEgenes[annotatedDEgenes[12] == "pseudogene", ]
+
+
+annotatedDEgenes[annotatedDEgenes$Feature != "protein_coding", ] #all rows where the feature does not equal (!= means not equal or doesn't match) protein_coding.
+```
+
+
+
