@@ -159,5 +159,5 @@ We can also check how many levels there are by using the levels function.  This 
 #check how many levels in the feature column that we just extracted.
 levels(feature)
 ```
-
+Next
 
