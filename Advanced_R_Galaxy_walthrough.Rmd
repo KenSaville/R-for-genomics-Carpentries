@@ -289,4 +289,38 @@ annotatedDEgenes[annotatedDEgenes$Feature != "protein_coding", ] #all rows where
 ```
 
 
+### Creating a new data frame containing a subset of the data from the original.
+
+Let's say we want all of the genes that are transcribed from the positive strand of the genome.  This information is contained in the "Strand" column, which is column 11. This column is a factor, with 2 levels.  The levels are + and -.
+
+Recall that factors allow us to do a simple plot of the count of each type of factor.  try that now for the strands column.  Use the dollar sign notation to designate the strand column.
+
+```{r}
+#your code here
+
+plot(annotatedDEgenes$Strand)
+```
+
+Now let's selct all of the genes on the positive strand and add them to as a new data frame in a new variable called annotatedDEgenes_plusStrand
+
+```{r}
+# create a new data frame containing only observations from the "+" strand
+annotatedDEgenes_plusStrand <- annotatedDEgenes[annotatedDEgenes$Strand == "+",]
+```
+
+How many did you get?  Is this number consistent with your plot above?
+
+Check the dimensions and structure of your new data frame and generate an overall summary
+
+```{r}
+#dimensions (number of rows and columns)
+dim(annotatedDEgenes_plusStrand)
+
+#structure
+str(annotatedDEgenes_plusStrand)
+
+#summary
+summary(annotatedDEgenes_plusStrand)
+
+```
 
