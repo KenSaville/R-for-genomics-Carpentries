@@ -682,10 +682,217 @@ Some more practice with conditionals
 
 Select all the rows for genes that:
 
-start after position 1e6
- (one million) and before position 2e6
- (included) in their chromosome
-have a log2 fold change greater than 1 or an adjusted p-value less than 1e−75
-.
+start after position one million (1e6) and end before position 2 million (2e6) (inclusive) in their chromosome AND
 
+have a log2 fold change greater than 1 or an adjusted p-value less than 1e−75
+
+```{r}
+#your code here
+
+```
+
+
+```{r}
+#solution
+
+annotatedDEgenes %>% filter(Start >= 1e6 & End <= 2e6 & (log2.FC. > 1 | P.adj < 1e-75))
+```
+
+
+### Create columns - Using mutate()
+
+Frequently we want to create new columns based on the values in existing columns, e.g. to do unit conversions or find the ratio of values in two columns. For this we can use the dplyr function mutate().
+
+In the data frame, there is a column titled log2.FC.. This is the logarithmically-adjusted representation of the fold-change observed in expression of the genes in the transcriptomic experiment from which this data is derived. We can calculate the observed expression level relative to the reference according to the formula: FC=2log2.FC.
+
+
+Let’s create a column FC to our annotatedDEgenes data frame that show the raw observed expression as a rather than the log2.FC reference level.  This is given by the formula 2 to the log2.FC power.  which is written 2 ** log2.FC. We will call this new column FC.  
+
+for example of the log2.FC value is 4, the FC value would be 2 ** 4 = 16.  
+
+```{r}
+#we can use R as a simple calculater to check that
+
+2 ** 4
+```
+
+In the context of this experiment, this would mean that the gene is expressed 16 times more than the reference gene.  Very often this type of expression level is represented as the log2 of that number.  (log2 of 16 = 4)
+
+so let's do this calculation for every row in the table and create a new column called FC to contain the result.
+
+We can then pipe the result into the head fuction to see just the first few rows.  Once you get the result, scroll over to be sure that new FC column exists as the last column.
+
+```{r}
+annotatedDEgenes %>% mutate(FC = 2 ** log2.FC.) %>%  head()
+```
+
+Note - this won't change our dataframe permanenty.  We would have to save it as a variable to save the change permanently.
+
+Now you try it
+
+Create a new column called Gene.length and just look at the GeneID, Chromosome, Start, End, and Length columns.  Gene length is simply End minus Start for each gene.
+
+```{r}
+#you try it then scroll.  in other words stop, drop (your answer), and scroll.
+```
+
+The solution:
+
+```{r}
+#Creating a new column of gene length
+
+annotatedDEgenes %>% mutate(Length = End - Start) %>% head()
+
+```
+
+Notice that this works for + strand and minus strand genes.  The way the data is entered, the start and end coordinates for the gene just cover the start and end of the region that contains the gene, rather than starting at the 5' end of the gene and ending at the 3' end.
+
+Oops.  The above code shows all columns and the question asked to show only GeneID Chromosome Start End and Length.  Easy enough to fix
+
+```{r}
+#Stop, drop and scroll
+```
+
+
+Solution:  Copy and paste the above,pipe it into select, designating the appropriate coluns to select.
+
+```{r}
+annotatedDEgenes %>% mutate(Length = End - Start) %>% select(GeneID, Chromosome, Start, End, Length) %>% head()
+```
+
+### Group and summarize data
+
+Many data analysis tasks can be approached using the “split-apply-combine” paradigm: split the data into groups, apply some analysis to each group, and then combine the results.
+
+dplyr makes this very easy through the use of the group_by() function, which splits the data into groups. When the data is grouped in this way summarize() can be used to collapse each group into a single-row summary, by applying an aggregating or summary function to each group.  
+
+For example, if you had data on students in a college, you might want to group these by major or by class and compute the average (mean) for the group.  The mean is actually calculated within a summarise function
+
+To do this for this example you would do the following
+
+college_data %>% group_by(major) %>% summarise(Mean_gpa = mean(gpa))
+
+This would result in a table with a column called mean_gpa.  The data in the column would be the mean of the gpa of each major.  (This assumes there is a column in the original table called gpa).  The mean_gpa part is a title you provide for the column title.  mean(gpa) performs the mean() function on the data in the gpa column.
+
+Let's look at some examples for our gene data
+
+1.  How many genes are on each chromosome? We can calculate this using the n() option of summarize. This function provides a count for each group produced by the group_by function.  In this case 
+
+```{r}
+# How many genes are on each chromosome?
+annotatedDEgenes %>% group_by(Chromosome) %>% summarise(number_of_genes = n())
+
+#Note - you don't need quotes around chromosoem and using quotes gives the wrong answer.
+
+```
+
+Here the summary function used was n() to find the count for each group. Because it’s a common operation, the dplyr verb, count() is a “shortcut” that combines both group_by and summarize.
+
+So we could have used
+
+```{r}
+#using the count() function
+
+annotatedDEgenes %>% count(Chromosome)
+
+```
+
+Note that this doesn't seem like a lot of genes on each chromosome.  There are thousands of genes on each chromosome.  However, this data contains only differentially expressed genes identified in our experiment.
+
+We can also apply many other functions to individual columns to get other summary statistics.
+
+Try finding the highest fold change (log2.FC.) for each chromosome.  Use the max function to calculate the highest.
+
+```{r}
+#Stop, drop, and scroll
+```
+
+
+Answer
+
+```{r}
+annotatedDEgenes %>% group_by(Chromosome) %>% summarize(Most_Change = max(log2.FC.))
+```
+
+group_by() can also take multiple column names.
+
+```{r}
+annotatedDEgenes %>% group_by(Chromosome, Strand) %>% summarize(Most_Change = max(log2.FC.))
+```
+
+
+R has many base functions like mean(), median(), min(), and max() that are useful to compute summary statistics. These are also called “built-in functions” because they come with R and don’t require that you install any additional packages.
+
+By default, all R functions operating on vectors that contains missing data will return NA. It’s a way to make sure that users know they have missing data, and make a conscious decision on how to deal with it. When dealing with simple statistics like the mean, the easiest way to ignore NA (the missing data) is to use na.rm = TRUE (rm stands for remove).
+
+### Reshape data frames
+
+The standard, best format for representing data in a datframe is referred to as the tidy format.  In this format, data is said to be in "long" format. For example in the current data set the Strand data is represented as a column with + or - in each row as appropriate.  We can reshape this data into what's called "wdie" format.  In this case we can use the + and - as their own columns.  This shortens the data and spreads it wider (just a little wider in this case.)  For example, we can convert
+
+Chr Strand
+X      +
+2      -
+3      +
+X      +
+2      -
+X      -
+3      -
+
+to
+
+Chr     +      -
+X       2     1
+2       0     2
+3       1     1
+
+Notice how the top table is long (7 rows) and narrower (2 columns)
+
+and the secon table is shorter (3 rows) and wider (3 columns)
+
+Each type of format has it's value and we can convert one to another using dplyr.
+
+Transforming the “long” tidy format, into the wide format can be done with the spread() function provided by the tidyr package (also part of the tidyverse).
+
+spread() takes a data frame as the first argument, and two subsequent arguments:
+
+first, the name of the column whose values will become the column names
+
+second, the name of the column whose values will fill the cells in the wide data
+
+```{r}
+#Create annotatedDEgenes_wide with chromosomes as row, strand as column and number of genes as values
+
+ annotatedDEgenes_wide <- annotatedDEgenes %>%
+    group_by(Chromosome, Strand) %>%
+    summarize(n = n()) %>%
+    spread(Strand, n)
+ annotatedDEgenes_wide
+ 
+ 
+```
+
+The opposite of spread is gather().
+
+so spread:  long --> wide.
+gather:  wide --> long
+
+example:
+Create a data frame with chromosomes, strand and number as columns from annotatedDEgenes_wide
+
+```{r}
+annotatedDEgenes_wide %>%
+    gather(Strand, n, -Chromosome)
+```
+
+Classify each gene as either “up-regulated” (fold change > 1) or “down-regulated” (fold change < 1) and create a table with Chromosome as rows, the two new labels as columns, and the number of genes in the cells.
+
+```{r}
+annotatedDEgenes %>%
+   mutate(exp_cat = case_when(
+     log2.FC. >=  1 ~ "up-regulated",
+     log2.FC. <= -1 ~ "down-regulated"
+   )) %>%
+   count(Chromosome, exp_cat) %>%
+   spread(exp_cat, n)
+```
 
