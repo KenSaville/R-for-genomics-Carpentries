@@ -324,3 +324,81 @@ summary(annotatedDEgenes_plusStrand)
 
 ```
 
+### Change type of columns
+
+Above we changed character colimns to factor.  This section goes over how to do this.
+
+Sometimes, it is possible that R will misinterpret the type of data represented in a data frame, or store that data in a mode which prevents you from operating on the data the way you wish. For example, a long list of gene names isn’t usually thought of as a categorical variable, the way that your experimental condition (e.g. control, treatment) might be. More importantly, some R packages you use to analyze your data may expect characters as input, not factors. At other times (such as plotting or some statistical analyses) a factor may be more appropriate. Ultimately, you should know how to change the mode of an object.
+
+First, its very important to recognize that coercion happens in R all the time. This can be a good thing when R gets it right, or a bad thing when the result is not what you expect.  Coercion means that R "decide" what type the data should be and coerces it to be that type.  Sometimes we need to change this.
+
+To demonstrate we will work tith the Gene.name column of the annotatedDEgenes dataframe.
+
+```{r}
+#look at the structure of the gene.name column.  NOtice that the data is a factor.
+
+str(annotatedDEgenes$Gene.name)
+
+```
+The result shows that this column is a factor with 130 levels.  The numbers following refer to each level.  That is, each level is assigned a particular number, levl 1, 2, 3 etc.
+
+This column contains the name of each gene.  It doesn't make sense to treat these as a factor.  Each factor, or category would just contain one gene name.  Let's convert this coulmn to chaarcter.  it's pretty simple
+
+```{r}
+#convert annotaedDEgenes$Gene.name to character
+
+annotatedDEgenes$Gene.name <- as.character(annotatedDEgenes$Gene.name)
+
+# Now let's look at the structure again
+
+str(annotatedDEgenes$Gene.name)
+```
+One way to avoid needless coercion when importing a data frame using functions such as read.csv() is to set the argument StringsAsFactors to FALSE. By default, this argument is TRUE. Setting it to FALSE will treat any non-numeric column to a character type. Going through the read.csv() documentation, you will also see you can explicitly type your columns using the colClasses argument. Other R packages (such as the Tidyverse readr) don’t have this particular conversion issue, but many packages will still try to guess a data type.
+
+### Inspect a numerical column using math, sorting, renaming ...
+
+Here are a few operations that don’t need much explanation, but which are good to know. There are lots of arithmetic functions you may want to apply to your data frame. For example, you can use functions like mean(), min(), max() on an individual column.
+
+Let’s look at the Base.mean column, i.e. the mean of normalized counts of all samples, normalizing for sequencing depth and library composition.
+
+```{r}
+# Get the maximum value
+max(annotatedDEgenes$Base.mean)
+```
+Sort the data (highest to lowest).  Instead of a function called sort, R uses a function called order.  
+
+```{r}
+#sort the Basemean column
+order(annotatedDEgenes$Base.mean)
+
+```
+
+Ote that this gives a bunch of numbers that don't appear to be in order.  These numbers are the indices of each row.  So row # 117 has the highes Base.mean.  This function doesn't return the actual values in the column, it just returns the new order.
+
+Also, The above command doesn't change the dataframe, it just sorts the column and returns the result.  We can do this to create a new dataframe with all of the values soreted by Basemean.  We will save this in a new variable called sorted_byBaseMean
+
+```{r}
+sorted_BaseMean <- annotatedDEgenes[order(annotatedDEgenes$Base.mean),]
+```
+
+So, in the above command we sort the annotated genes dataframe, then store it in the new variable.  A way to read the sorting part (the right side of the above expression) in english is:
+
+"acting on the annotatedDEgene dataframe, reorder the rows according to the Base.mean column.  and return all of the columns".  The "return all of the columns" part is accomplished by using the comma after annotatedDEgenes$Base.mean)
+
+Let's have a look and see if the above command worked.  We should have a new dataframe called sorted_BaseMean.  And it should be sorted by Base.mean.  We can use the head command to see the first 6 rows.
+
+```{r}
+head(sorted_BaseMean)
+```
+notice that this automatically sorts from lowest to highest value.  If we wanted to repeat the above from highest to lowest we could do include the decreasing = TRUE argument: 
+
+annotatedDEgenes[order(annotatedDEgenes$Base.mean, decreasing = TRUE)
+
+Let's do that, but rather than saving it as a new data frame, let's just look at the first six lines using the head function again.  That is we "feed" the annotatedDEgenes[order(annotatedDEgenes$Base.mean, decreasing = TRUE) statement directly to the head function, without first storing it in a variable.
+
+```{r}
+#sort by Base.mean in decreasing order.
+
+head(annotatedDEgenes[order(annotatedDEgenes$Base.mean, decreasing = TRUE),])
+```
+
