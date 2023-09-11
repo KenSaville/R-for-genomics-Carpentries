@@ -104,7 +104,7 @@ When we import the data using the command above, the character data did not come
 
 Here, we can convert the chr data to factor data, so that our data frame is consistent with the tutorial.  There are various ways to do this.  Here we will try a function from the dplyr package called mutateif.  This will change (mutate) data in a dataframe based on some condition.  We will cover some other basic functions of dplyr a bit later.
 
-first we need to install and load the dplyr pakcge.  dplyr is part of what is called the tidyverse, so we'll install the tiduverse which has lots of other useful packages.
+first we need to install and load the dplyr packcage.  dplyr is part of what is called the tidyverse, so we'll install the tiduverse which has lots of other useful packages.
 
 ```{r}
 install.packages("tidyverse")
@@ -192,8 +192,9 @@ Let' see if that worked
 #check structure of feature chr vector
 str(feature_chr)
 
-#now try to plot it
-plot(feature_chr)
+#now, uncomment and run the line below to try to plot it
+
+#plot(feature_chr)
 
 ```
 
@@ -401,4 +402,290 @@ Let's do that, but rather than saving it as a new data frame, let's just look at
 
 head(annotatedDEgenes[order(annotatedDEgenes$Base.mean, decreasing = TRUE),])
 ```
+
+### Save a data frame to a file
+
+We can save a dataframe as a table.  Let's use the sorted data frame as an example.  The write.csv() function has some additional arguments listed in the help, but at a minimum you need to tell it what data frame to write to file, and give a path to a file name in quotes (if you only provide a file name, the file will be written in the current working directory).
+
+```{r}
+#Save the annotatedDEgenes_plusStrand object to a .csv file using the write.csv() function:
+
+write.csv(sorted_BaseMean, file = "annotatedDEgenes_sorted.csv")
+
+```
+
+A new csv file should have appeared in the Files section of your working directory.
+
+If working in poit cloud and you want to down load this file to your computer, do the following:
+
+To downlad this file to your computer
+
+1. click on the empty check box to the left of the file name, so that it is now checked.
+
+2.  click on the gear icon just above the files panel.
+
+3. select the Export option.  
+
+4.  In the dialog box, give your file a name and browse to where you would like to save it.  Include the .csv extension in your file name.
+
+Now, go to your computer desktop, find the file you just downloaded and open it in excel.
+
+### Aggregate and Analyze with dplyr
+
+Selecting columns and rows using bracket subsetting is handy, but it can be cumbersome and difficult to read, especially for complicated operations.
+
+Even the relativley simple expression we used above is difficult to interpret
+
+sorted_BaseMean <- annotatedDEgenes[order(annotatedDEgenes$Base.mean),]
+
+Th "dplyr" package makes subsetting and manipulating dataframes much more user friendly.  Of course, this takes a little getting used to as well, but the logical flow is more straightforward.
+
+The functions we’ve been using so far, like str(), come built into R. By using packages, we can access more functions. The dplyr package provides a number of very useful functions for manipulating data frames in a way that will reduce repetition, reduce the probability of making errors, and probably even save you some typing. As an added bonus, you might even find the dplyr grammar easier to read.
+
+** What is dplyr? **
+
+The package dplyr is a fairly new (2014) package that tries to provide easy tools for the most common data manipulation tasks. It is built to work directly with data frames. 
+
+To get started we need to load the dplyr package.  We can install dplyr directly, or we can install the tidyverse which contains dplyr and a number of other useful packages.  
+
+We actually loaded this earlier in this tutorial when we sort of jumped ahead to convert our character data to factor data.
+
+But just in case let's install it again.
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+### Select columns and filter rows
+
+In base R, we select columns and rows using bracket notation.  For example, to select the GeneID, Start, End, and Strand columns, and to use all rows for those columns we would write:
+
+```{r}
+# Select the GeneID, Start, End, and Strand columns (and to all rows)
+
+annotatedDEgenes[,c("GeneID", "Start", "End", "Strand")]
+
+# notice the comma immediately inside the bracket.  This means return all rows.  If we wanted a subset of the rows, ecould include various filters before this comma to designate which rows we want.
+
+```
+
+### The dplyr way.  
+
+Dplyr uses a function called select to select specific columns.  The format for this function is:
+
+select(name_of_dataframe, firstcol_to_select, secondcol_to_select, ...)
+
+For the columns to select, you simply need to write the name of the column.  No quotes are needed.  All rows are returned by default.
+
+The above command using dplyr would look like this
+
+```{r}
+select(annotatedDEgenes, GeneID, Start, End, Strand)
+```
+
+Another way to do this is to use pipes.  the %>$ symbol functions as a "pipe".  This means that you can send one object directly to a function through a pipe.  for example annotatedDEgenes %>% select(), would send the annotatedDEgenes dataframe directly into the select function.  Within the select function, we would indicate which columns to select.
+
+Note:  when typing in a code chunk, the pipe symbol can be called by using the "ctrl-shift-m" key shortcut.  Just hit these 3 keys at the same time.
+
+annotatedDEgenes %>% select(GeneID, Start, End, Strand)
+
+Note, now we don't need to include the dataframe name inside the parentheses.  Let's see if this works
+
+```{r}
+#using a pipe
+annotatedDEgenes %>% select(GeneID, Start, End, Strand)
+```
+
+The beauty of pipes is that we can now send the results of the select command directly into another function.  For example the next function we will use is called filter, which filters which specific rows to return.
+
+As we go forward try to remember that select acts on columns and filter acts on rows.  One way to help remember might be because the word select has a c in it and filter has an r in it we can associate seleCt with columns and filteR with rows.
+
+let's use filter to return only those rows that contain genes on the + strand.
+
+Using base R this would look like this
+
+```{r}
+annotatedDEgenes[annotatedDEgenes$Strand == "+", c("GeneID", "Start", "End", "Strand")]
+```
+
+With dplyr, this looks like this:
+
+(note - you need the quotes around +)
+
+```{r}
+annotatedDEgenes %>% select(GeneID, Start, End, Strand) %>% filter(Strand== "+")
+```
+
+Let's say we wanted to sort these genes based on their position in the genome.  We can sort on the start column.  Of course, the sort command isn't called sort.  
+In dplyr it is called arrange.
+
+```{r}
+annotatedDEgenes %>% select(GeneID, Start, End, Strand) %>% filter(Strand== "+") %>% arrange(Start)
+```
+
+Note:  The default sorting is in ascending order.  You can change the order to descending order by using the desc function for the column used. 
+
+for example, here we could sort in descending order as follows.
+
+```{r}
+#sort in descendng order
+annotatedDEgenes %>% select(GeneID, Start, End, Strand) %>% filter(Strand== "+") %>% arrange(desc(Start))
+```
+
+However, if we were listing genes in order of position, ascending would make more sense.  Let's repeat that, and store the result in a new data frame, to show how that would work.
+
+```{r}
+annotated_genes_plus_sorted <- annotatedDEgenes %>% select(GeneID, Start, End, Strand) %>% filter(Strand== "+") %>% arrange(Start)
+```
+
+### Additional options for select
+
+There are lots of ways to specifiy the types of columns you want to select.  Below are a few examples.  For a full description of the select command tye ?select in a code chunk or in the console below.
+
+```{r}
+#select all columns except certain ones
+select(annotatedDEgenes, -Chromosome)
+
+#or
+
+annotatedDEgenes %>% select(-Chromosome)
+```
+
+```{r}
+#Select columns starting with the letter P
+
+select(annotatedDEgenes, starts_with("P"))
+
+#or
+
+annotatedDEgenes %>% select(starts_with("P"))
+```
+
+Now you try it.  Create a table that contains all the columns with the letter “s” in their name except for the column “Wald.Stats”, and that contains the column “End”.  Use the function contains for the leter s
+
+Write your code in the block below, then scroll down for the answer.
+
+```{r}
+#your code here.
+
+```
+
+```{r}
+annotatedDEgenes %>% select(contains("s"), -Wald.Stats, End)
+```
+
+hmmm.  That worked, but Start and End aren't nest to each other.  See if you can figure out how to move the End column to the position after start.  Use google or whatever to figure this out.
+
+Write your code in the block below, then scroll down for the answer.
+
+```{r}
+#your code here.
+
+```
+
+```{r}
+#how to move the End column to the position after start
+
+annotatedDEgenes %>% select(contains("s"), -Wald.Stats, End) %>% relocate(End, .after = Start)
+
+```
+
+
+### Some more filter options
+
+1.  Filter rows for gens on the X chromosome
+
+```{r}
+#Filter rows for gens on the X chromosome
+annotatedDEgenes %>% filter(Chromosome == "chrX")
+```
+
+
+2.Filter  rows for gens on the X chromosome or chr2R
+
+```{r}
+#Filter rows for gens on the X chromosome
+annotatedDEgenes %>% filter(Chromosome == c("chrX", "chr2R"))
+```
+
+Here we provide a list (actually a vector) of things to match.  when we combine things into a vector we need to use the c() notation.  This is easy to forget (at least for me).  Hint:  I forgot to do that here and got an error.
+
+```{r}
+#Filter rows for gens on the X chromosome, with error
+
+#uncomment the line below to see the error.
+
+#annotatedDEgenes %>% filter(Chromosome == "chrX", "chr2R")
+
+#The error says: must be a logical vector, not the string "chr2R".
+#we use c() to make it into a vector
+
+```
+
+filter() allows you to combine multiple conditions using logical operators.  These are.
+
+ & for AND
+ | for OR
+ == for "matches"
+ != for doesnt match
+ < for less than
+ <=  less than or equal to
+ > for greater than
+ >= for greater than or equal to
+
+Let's try a few.  For each example, you try it then scroll down for answers
+
+```{r}
+#Filter for genes on the X with a p-value <=1e-100
+```
+
+```{r}
+#Filter for genes on chrX and with log2 Fold Change (log2.fc column) smaller than -2 greater than 2
+```
+
+```{r}
+#Filter for genes on chrX and with log2 Fold Change (log2.fc column) smaller than -2 or larger than 2
+```
+
+
+```{r}
+#Filter for genes on the X with a p-value <=1e-100.  All are equivalent ways to do this
+
+#without pipes
+
+filter(annotatedDEgenes, Chromosome == "chrX" & P.adj <= 1e-100)
+filter(annotatedDEgenes, Chromosome == "chrX", P.adj <= 1e-100)
+
+#with pipes
+annotatedDEgenes %>% filter (Chromosome == "chrX" & P.adj <= 1e-100)
+annotatedDEgenes %>% filter (Chromosome == "chrX" , P.adj <= 1e-100)
+```
+
+```{r}
+#Filter for genes on chrX and with log2 Fold Change (log2.FC. column) greater than 2.  Be careful here.  The actual name of the column is log2.FC.  That second . is part of the name.  Probably by mistake.
+
+annotatedDEgenes %>% filter(log2.FC. > 2)
+```
+
+
+```{r}
+#Filter for genes on chrX and with log2 Fold Change smaller than -2 or larger than 2
+
+annotatedDEgenes %>% filter(log2.FC. < -2 | log2.FC. > 2 )
+
+```
+
+BTW this means "show the genes where the difference in expression was less than 2 times lower than the control or more than 2 X higher than the control.
+
+Some more practice with conditionals
+
+Select all the rows for genes that:
+
+start after position 1e6
+ (one million) and before position 2e6
+ (included) in their chromosome
+have a log2 fold change greater than 1 or an adjusted p-value less than 1e−75
+.
+
 
